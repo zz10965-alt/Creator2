@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creator Shortlist</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>Creator Shortlist</h1>
+    <div class="topbar-right">
+      <span id="mode-badge" class="badge badge-muted">idle</span>
+      <button id="btn-reset" class="btn btn-ghost">Reset</button>
+    </div>
+  </header>
+
+  <!-- Chat view (Wix-style: full-page conversation, live brief on the left) -->
+  <main id="view-chat" class="view-chat">
+    <div class="chat-shell">
+      <aside class="brief-panel">
+        <div class="panel-eyebrow">Campaign</div>
+        <h2 class="panel-title">Campaign brief</h2>
+        <p class="panel-desc">Your brand, audience, and budget — filled in as we talk.</p>
+
+        <div class="panel-section">
+          <div class="panel-label">Brief</div>
+          <div id="brief-live" class="brief-live">
+            <p class="hint">Tell me about your brand to start building the brief.</p>
+          </div>
+        </div>
+
+        <div class="panel-section" id="trends-section" hidden>
+          <div class="panel-label">Current trends</div>
+          <div id="trends-live" class="trends-live"></div>
+        </div>
+
+        <details class="advanced">
+          <summary>Advanced: metric weights</summary>
+          <div id="weights"></div>
+          <p class="hint" style="margin-top:8px">Sliders are normalized automatically - they don't need to add up to 100.</p>
+        </details>
+
+        <div class="brief-panel-actions">
+          <button id="btn-sample-top" class="btn btn-ghost-sm">Try a sample</button>
+          <button id="btn-continue" class="btn btn-primary btn-continue" hidden>Continue &rarr;</button>
+        </div>
+      </aside>
+
+      <section class="chat-area">
+        <header class="chat-head">
+          <button class="btn btn-ghost-sm" onclick="reset()" title="Back to start">&larr;</button>
+          <span class="chat-title">Creator Shortlist</span>
+        </header>
+        <div id="chat-log" class="chat-log"></div>
+        <div class="chat-input">
+          <input id="chat-msg" type="text" placeholder="Tell me about your brand or campaign...">
+          <button id="chat-send" class="btn btn-primary">Send</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Waiting view (shown while analysis runs) -->
+  <main id="view-waiting" class="view-waiting hidden">
+    <div class="waiting-box">
+      <div class="spinner"></div>
+      <h2 id="waiting-title">Discovering &amp; scoring creators&hellip;</h2>
+      <p id="waiting-sub">Fetching candidate channels, scoring fit, and ranking by your budget.</p>
+    </div>
+  </main>
+
+  <!-- Results view -->
+  <main id="view-results" class="view-results hidden">
+    <div class="results-grid">
+      <section class="card">
+        <h2>Budget options</h2>
+        <div id="budget-cards" class="budget-cards"></div>
+      </section>
+
+      <section class="card">
+        <h2>Recommendation</h2>
+        <div id="insights" class="insights"></div>
+      </section>
+
+      <section class="card">
+        <h2>Ranking</h2>
+        <div class="legend">
+          <span><span class="src-dot data"></span> from data</span>
+          <span><span class="src-dot ai"></span> AI inferred</span>
+        </div>
+        <div id="excluded" class="excluded"></div>
+        <div id="ranking" class="ranking"></div>
+      </section>
+
+      <section class="card">
+        <h2>Trending today</h2>
+        <div id="trending" class="trending"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Script / chart modal -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-body">
+      <div class="modal-head">
+        <span id="modal-title">Script</span>
+        <div class="modal-head-actions">
+          <button id="modal-print" class="btn">Print / PDF</button>
+          <button id="modal-close" class="btn btn-ghost">&times;</button>
+        </div>
+      </div>
+      <div id="modal-doc" class="modal-doc"></div>
+      <div id="modal-chart" class="modal-content" style="display:none"></div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
