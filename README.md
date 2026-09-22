@@ -3,11 +3,35 @@
 NYU SPS x Google Hackathon | Track 2 (Product & Engineering)
 
 A brand enters a brief (via a form or a Gemini chat interviewer) and the tool runs the
-whole flow automatically - **discover -> fetch data -> score -> rank -> budget optimization ->
-AI recommendation** - compressing hours of manual shortlisting into minutes.
+whole flow automatically - **search trends -> discover -> fetch data -> score -> rank ->
+budget optimization -> AI recommendation -> script** - compressing hours of manual
+shortlisting into minutes.
 
 Built end-to-end on Google products: **Gemini** (qualitative scoring + narrative),
 **YouTube Data API v3** (discovery + data), **Google Charts** (frontend charts).
+
+## The flow
+
+1. **Brief** - a Gemini interviewer collects the campaign in natural conversation: brand,
+   keywords, target audience, target market (country, then a specific region if the answer
+   is just a country), budget, number of creators, ad length, format, competitors, and risk
+   topics.
+2. **Search trends** - Gemini + Google Search grounding identifies 3-5 current trends or
+   cultural moments relevant to the brief, so discovery pulls topic-relevant creators rather
+   than a generic chart.
+3. **Discover** - YouTube Data API v3 turns those keywords + trends into candidate channels,
+   then pulls each channel's recent videos, stats, and comments.
+4. **Score** - every candidate is scored 0-100 across nine weighted metrics: Gemini for the
+   qualitative ones (content / audience / quality / risk), plain math for engagement, growth,
+   stability, and consistency.
+5. **Cutoff** - hard filters remove off-topic, wrong-audience, risky, inactive, or low-reach
+   channels (each exclusion is recorded with a reason).
+6. **Rank** - a weighted total ranks the survivors; comment sentiment is overlaid as a badge.
+7. **Budget** - a 0/1 knapsack optimizes the best lineup within the budget (under / at / over).
+8. **Recommend** - a structured panel explains the best single match, the recommended lineup,
+   and the risks in plain English.
+9. **Create** - pick a creative angle (concept), then Gemini writes a full collaboration
+   script for any shortlisted creator.
 
 ## Quick start
 
@@ -23,11 +47,30 @@ Then open **http://localhost:8000**. The web app has:
 - **budget options** (under / at / over) with a comparison chart,
 - a **structured recommendation** (best single match / recommended lineup / risks),
 - a **trending today** strip matched to your shortlist,
+- a **trend search** step that uses Gemini + Google Search to surface current trends first,
+- a **Try a sample** button that replays the full flow end-to-end with zero Gemini quota,
 - per-creator **score chart** and **"generate script"** buttons.
 
 **CLI fallback (still works):** `python main.py`
 
-## Environment variables (`.env`, committed to this private repo)
+## Try a sample (full-flow demo, zero Gemini)
+
+The **Try a sample** button replays the entire flow end-to-end with a scripted brief, so a
+live demo never stalls on quota or waits on the network:
+
+- plays a scripted chat interview (including the "which market?" -> "which region?" follow-up),
+- shows realistic preset trends,
+- pulls **real YouTube creators** from the brief (YouTube is free, so this costs no Gemini),
+- scores them with the keyword fallback + deterministic sentiment (no Gemini),
+- then hands off to the normal results page (ranking, budget, recommendation, script).
+
+In short: the sample runs the *same pipeline* as a real run, but swaps Gemini for the
+deterministic fallbacks, so it uses zero Gemini quota and finishes instantly.
+
+## Environment variables (`.env`, not committed)
+
+Create a `.env` file in the project root (it's gitignored, so it stays local and is never
+committed):
 
 ```bash
 YOUTUBE_API_KEY=your_YouTube_Data_API_v3_key
@@ -35,8 +78,8 @@ GEMINI_API_KEY=            # optional; fill in for qualitative scoring + chat + 
 ```
 
 - `YOUTUBE_API_KEY` set -> **LIVE** mode (real data); missing -> **DEMO** mode (built-in samples).
-- `GEMINI_API_KEY` set -> qualitative scoring, chat interviewer, and insight narrative use
-  Gemini; missing -> keyword fallback + deterministic summaries (the app still runs).
+- `GEMINI_API_KEY` set -> qualitative scoring, chat interviewer, trend search, and insight
+  narrative use Gemini; missing -> keyword fallback + deterministic summaries (the app still runs).
 
 ## Metric model
 
@@ -109,7 +152,9 @@ finance 30, gaming 8, fashion 15, food 10, fitness 12, default 15.
 | `/api/chat` | POST | one chat turn; returns `{reply, campaign_input}` |
 | `/api/insights` | POST | structured recommendation (best match + lineup + risks) |
 | `/api/trending` | GET | today's trending videos |
+| `/api/trending/search` | POST | Gemini + Google Search: identify current trends for the brief |
 | `/api/trending/match` | POST | match trending videos to shortlisted creators |
+| `/api/concepts` | POST | generate creative angles (concepts) for one creator |
 | `/api/script` | POST | generate a collaboration script for one creator |
 
 ## Files
@@ -126,7 +171,7 @@ finance 30, gaming 8, fashion 15, food 10, fitness 12, default 15.
 | `pricing.py` | Pricing + value-per-dollar + 0/1 knapsack + budget scenarios |
 | `sentiment.py` | Comment sentiment -> fans/haters/positive ratio |
 | `chat.py` | Gemini chat interviewer that collects the brief |
-| `insights.py` | Recommendation narrative + script + trending match |
+| `insights.py` | Recommendation narrative + trend search + concepts + script + trending match |
 | `mock.py` | Sample data (DEMO mode) |
 | `config.py` | Weights / thresholds / CPM benchmarks / keys |
 
