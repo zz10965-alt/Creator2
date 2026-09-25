@@ -31,6 +31,10 @@ def generate(results, campaign_input, use_gemini=True):
                 data["ai_take"] = take
         except Exception:
             pass
+    # Zero-Gemini runs (sample / no key / quota-saver) still get a take, so the
+    # Insights tab is never blank during a demo.
+    if not data.get("ai_take"):
+        data["ai_take"] = _fallback_take(results, campaign_input)
     return data
 
 
@@ -219,6 +223,22 @@ def _gemini_take(results, campaign_input):
               "Do not restate every number. Data:\n" + _json_compact(compact))
     resp = client.models.generate_content(model=config.GEMINI_MODEL, contents=prompt)
     return resp.text.strip()
+
+
+def _fallback_take(results, campaign_input):
+    """Deterministic executive take (no Gemini): same shape as _gemini_take output."""
+    creators = results.get("creators", [])
+    if not creators:
+        return "No creators survived the cutoffs for this brief."
+    top = creators[0]
+    parts = [f"Top pick {top['handle']} scores {top['total']:.0f}/100 with "
+             f"~{top['avg_views']:,.0f} average views per video."]
+    at = (results.get("budget_scenarios") or {}).get("at") or {}
+    picks = at.get("picks") or []
+    if picks and at.get("expected_views"):
+        parts.append(f"The budget-optimized lineup of {len(picks)} creators is projected "
+                     f"to reach ~{at['expected_views']:,.0f} views.")
+    return " ".join(parts)
 
 
 # ---------------------------------------------------------------------------
