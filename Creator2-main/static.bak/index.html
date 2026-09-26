@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creator Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">✦</span>
+      <div class="brand-text">
+        <span class="brand-name">Creator Intelligence</span>
+        <span class="brand-sub">Powered by Gemini + YouTube</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span id="mode-badge" class="badge badge-muted">Ready</span>
+      <button id="btn-reset" class="btn btn-ghost">Reset</button>
+    </div>
+  </header>
+
+  <!-- Chat view: live campaign brief (left) + AI assistant (right) -->
+  <main id="view-chat" class="view-chat">
+    <div class="chat-shell">
+      <aside class="brief-panel">
+        <div class="panel-head">
+          <span class="panel-eyebrow">Campaign brief</span>
+          <h1 class="panel-title">Your campaign</h1>
+          <p class="panel-desc">Built live as we talk — brand, audience, market, budget.</p>
+        </div>
+
+        <div id="brief-live" class="brief-live"></div>
+
+        <div id="trends-section" class="trends-section" hidden>
+          <span class="panel-label">AI search context</span>
+          <div id="trends-live" class="trends-live"></div>
+        </div>
+
+        <details class="advanced">
+          <summary>Advanced scoring · 9 weighted signals</summary>
+          <div id="weights"></div>
+          <p class="hint">Sliders are normalized automatically — they don't need to add up to 100.</p>
+        </details>
+
+        <div class="brief-panel-actions">
+          <button id="btn-sample-top" class="btn btn-ghost">Try a sample</button>
+          <button id="btn-continue" class="btn btn-primary btn-continue" hidden>Continue &rarr;</button>
+        </div>
+      </aside>
+
+      <section class="chat-area">
+        <header class="chat-head">
+          <div>
+            <span class="chat-title">AI assistant</span>
+            <span class="chat-sub">Describe your campaign — I'll build the brief, then the shortlist</span>
+          </div>
+        </header>
+        <div id="chat-log" class="chat-log"></div>
+        <div class="suggestions" id="suggestions">
+          <span class="sug-label">Try:</span>
+          <button class="sug" data-prompt="We're launching an eco-friendly skincare brand for women 18-34">Eco skincare launch</button>
+          <button class="sug" data-prompt="Find creators for a fitness app targeting Gen Z">Fitness app · Gen Z</button>
+          <button class="sug" data-prompt="Promote a new podcast about personal finance">Finance podcast</button>
+        </div>
+        <div class="chat-input">
+          <input id="chat-msg" type="text" placeholder="Tell me about your brand or campaign…">
+          <button id="chat-send" class="btn btn-primary">Send</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Waiting view (shown while analysis runs) -->
+  <main id="view-waiting" class="view-waiting hidden">
+    <div class="waiting-box">
+      <div class="spinner"></div>
+      <h2 id="waiting-title">Discovering &amp; scoring creators&hellip;</h2>
+      <p id="waiting-sub">Finding candidate channels, scoring their fit, and ranking them by your budget.</p>
+    </div>
+  </main>
+
+  <!-- Results view -->
+  <main id="view-results" class="view-results hidden">
+    <header class="results-head">
+      <div>
+        <span class="eyebrow">Shortlist</span>
+        <h1 class="results-title">Creator recommendations</h1>
+        <p id="results-context" class="results-context"></p>
+      </div>
+    </header>
+
+    <nav class="tabs" id="results-tabs" role="tablist">
+      <button class="tab active" data-tab="overview" role="tab">Overview</button>
+      <button class="tab" data-tab="creators" role="tab">Creators</button>
+      <button class="tab" data-tab="budget" role="tab">Budget</button>
+      <button class="tab" data-tab="insights" role="tab">Insights</button>
+    </nav>
+
+    <section class="tab-panel active" id="tab-overview" role="tabpanel">
+      <div class="overview-grid">
+        <div id="hero"></div>
+        <div id="campaign-summary"></div>
+      </div>
+      <div id="lineup"></div>
+    </section>
+
+    <section class="tab-panel" id="tab-creators" role="tabpanel">
+      <div class="legend">
+        <span><span class="src-dot youtube"></span> from YouTube data</span>
+        <span><span class="src-dot ai"></span> AI inferred</span>
+      </div>
+      <div id="excluded" class="excluded"></div>
+      <div id="ranking" class="ranking"></div>
+    </section>
+
+    <section class="tab-panel" id="tab-budget" role="tabpanel">
+      <div id="budget-cards" class="budget-cards"></div>
+      <div id="budget-alts" class="budget-alts"></div>
+    </section>
+
+    <section class="tab-panel" id="tab-insights" role="tabpanel">
+      <div id="insights" class="insights"></div>
+      <div id="trending" class="trending"></div>
+    </section>
+  </main>
+
+  <!-- Script / chart modal -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-body">
+      <div class="modal-head">
+        <span id="modal-title">Script</span>
+        <div class="modal-head-actions">
+          <button id="modal-print" class="btn btn-ghost-sm">Print / PDF</button>
+          <button id="modal-close" class="btn btn-ghost">&times;</button>
+        </div>
+      </div>
+      <div id="modal-doc" class="modal-doc"></div>
+      <div id="modal-chart" class="modal-content" style="display:none"></div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
